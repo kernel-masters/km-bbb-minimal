@@ -1,0 +1,156 @@
+#!/bin/sh
+#   ---------------------------------------------
+#   Common settings
+#   ---------------------------------------------
+HOSTNAME="Kernel Masters Minimal FS"
+VERSION=1.0.0
+
+hostname $HOSTNAME
+
+#   ---------------------------------------------
+#   Prints execution status.
+#
+#   arg1 : Execution status
+#   arg2 : Continue (0) or Abort (1) on error
+#   ---------------------------------------------
+status ()
+{
+       if [ $1 -eq 0 ] ; then
+               echo "[SUCCESS]"
+       else
+               echo "[FAILED]"
+
+               if [ $2 -eq 1 ] ; then
+                       echo "... System init aborted."
+                       exit 1
+               fi
+       fi
+
+}
+
+#   ---------------------------------------------
+#   Get verbose
+#   ---------------------------------------------
+echo ""
+echo "    System initialization..."
+echo ""
+echo "    Hostname       : $HOSTNAME"
+echo "    Filesystem     : v$VERSION"
+echo ""
+echo ""
+echo "    Kernel release : `uname -s` `uname -r`"
+echo "    Kernel version : `uname -v`"
+echo ""
+
+
+#   ---------------------------------------------
+#   MDEV Support
+#   (Requires sysfs support in the kernel)
+#   ---------------------------------------------
+echo -n " Mounting /proc             : "
+mount -n -t proc /proc /proc
+status $? 1
+
+echo -n " Mounting /sys              : "
+mount -n -t sysfs sysfs /sys
+status $? 1
+
+echo -n " Mounting /dev              : "
+mount -n -t tmpfs mdev /dev
+status $? 1
+
+echo -n " Mounting /dev/pts          : "
+mkdir /dev/pts
+mount -t devpts devpts /dev/pts
+status $? 1
+
+echo -n " Enabling hot-plug          : "
+echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+status $? 0
+
+echo -n " Populating /dev            : "
+mkdir /dev/input
+mkdir /dev/snd
+
+mdev -s
+status $? 0
+
+#   ---------------------------------------------
+#   Disable power management
+#   (Requires sysfs support in the kernel)
+#   ---------------------------------------------
+# echo -n " Disabling Power mgmt       : "
+# echo -n "1" > /sys/power/cpuidle_deepest_state
+# status $? 1
+
+#   ---------------------------------------------
+#   Turn off LCD after 1 hour of inactivity
+#   (Requires sysfs support in the kernel)
+#   ---------------------------------------------
+# echo -n " Turn off LCD after 1 hour  : "
+# echo -n "3600" > /sys/power/fb_timeout_value
+# status $? 1
+
+
+#   ---------------------------------------------
+#   Mount the default file systems
+#   ---------------------------------------------
+echo -n " Mounting other filesystems : "
+mount -a
+status $? 0
+
+echo "Succesfully Mounted Systems"
+#   Set PATH
+#   ---------------------------------------------
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
+
+
+#   ---------------------------------------------
+#   Start other daemons
+#   ---------------------------------------------
+echo -n " Starting syslogd           : "
+/sbin/syslogd
+status $? 0
+
+echo -n " Starting telnetd           : "
+/usr/sbin/telnetd
+status $? 0
+
+
+#   ---------------------------------------------
+#   Done!
+#   ---------------------------------------------
+echo ""
+echo "System initialization complete."
+
+
+#   ---------------------------------------------
+#   Start demo app
+#   ---------------------------------------------
+if [[ -x /etc/init.d/gpio_toggle.sh ]]; then
+       echo " Starting LED Demo Application..."
+       /etc/init.d/gpio_toggle.sh &
+       sleep 2
+fi
+
+if [[ -x /etc/init.d/gpio_toggle.sh ]]; then
+       echo " Starting LCD Demo Application..."
+       /etc/init.d/km_startup_app &
+       sleep 2
+fi
+
+cat /proc/filesystems | grep -q debugfs
+if [ $? -eq 0 ] ; then
+        echo -n " Mounting /debug             : "
+        mount -n -t debugfs none /debug
+        status $? 1
+fi
+
+ifconfig eth0 192.168.1.12
+ifconfig eth1 192.168.1.34
+ifconfig lo 127.0.0.1
+ 
+if [ ! -f /etc/DBKEY ] ; then
+	dropbearkey -t rsa -f /etc/DBKEY
+fi
+dropbear -r /etc/DBKEY
