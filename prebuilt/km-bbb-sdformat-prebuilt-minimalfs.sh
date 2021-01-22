@@ -128,10 +128,10 @@ minimal_fs_copy_sd()
 	sudo mkdir -p /mnt/rootfs
 	sudo mount ${media}1 /mnt/rootfs
 	echo
-	sudo tar -xvf minimal-rootfs-1.0.tar.gz
-	echo -e "${Red}sudo tar -xvf minimal-rootfs-1.0.tar.gz -C /mnt/rootfs/${NC}"
-	sudo tar -xvf minimal-rootfs-1.0.tar -C /mnt/rootfs/
-	sudo rm -rf minimal-rootfs-1.0.tar
+	sudo tar -xvf minimal-rootfs-1.1.tar.gz
+	echo -e "${Red}sudo tar -xvf minimal-rootfs-1.1.tar.gz -C /mnt/rootfs/${NC}"
+	sudo tar -xvf minimal-rootfs-1.1.tar -C /mnt/rootfs/
+	sudo rm -rf minimal-rootfs-1.1.tar
 
 	sync
 	echo -e "{Red}syncing...${NC}"
