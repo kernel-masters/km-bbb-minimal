@@ -48,14 +48,17 @@ echo ""
 #   (Requires sysfs support in the kernel)
 #   ---------------------------------------------
 echo -n " Mounting /proc             : "
+mkdir /proc
 mount -n -t proc /proc /proc
 status $? 1
 
 echo -n " Mounting /sys              : "
+mkdir /sys
 mount -n -t sysfs sysfs /sys
 status $? 1
 
 echo -n " Mounting /dev              : "
+mkdir /dev
 mount -n -t tmpfs mdev /dev
 status $? 1
 
