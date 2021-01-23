@@ -44,24 +44,34 @@ echo ""
 
 if [ -d rootfs/proc ] ; then
         echo "${Red} rootfs/proc folder is found${NC}"
-fi
+else
         echo "${Purple} create a /proc folder${NC}"
         mkdir -p rootfs/proc
 	echo "${Purple}rootfs/proc folder successfully created.${NC}"
-
+fi
 if [ -d rootfs/sys ] ; then
         echo "${Red} rootfs/sys folder is found${NC}"
-fi
+else
         echo "${Purple} create a /sys folder${NC}"
         mkdir -p rootfs/sys
 	echo "${Purple}rootfs/sys folder successfully created.${NC}"
+fi
 
 if [ -d rootfs/dev ] ; then
         echo "${Red} rootfs/dev folder is found${NC}"
-fi
+else
         echo "${Purple} create a /dev folder${NC}"
         mkdir -p rootfs/dev
 	echo "${Purple}rootfs/dev folder successfully created.${NC}"
+fi
+
+if [ -d rootfs/debug ] ; then
+        echo "${Red} rootfs/debug folder is found${NC}"
+else
+        echo "${Purple} create a /debug folder${NC}"
+        mkdir -p rootfs/debug
+	echo "${Purple}rootfs/debug folder successfully created.${NC}"
+fi
 
 echo "${Green}-----------------------------"
 echo "${Red}BusyBox Install"
